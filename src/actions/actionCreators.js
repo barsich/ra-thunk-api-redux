@@ -13,6 +13,9 @@ import {
   EDIT_SERVICE_REQUEST,
   EDIT_SERVICE_FAILURE,
   EDIT_SERVICE_SUCCESS,
+  SAVE_SERVICE_REQUEST,
+  SAVE_SERVICE_FAILURE,
+  SAVE_SERVICE_SUCCESS,
 } from './actionTypes';
 
 export const fetchServicesRequest = () => ({
@@ -62,23 +65,23 @@ export const fetchEditableServiceSuccess = (service) => ({
   payload: { service },
 });
 
-export const addServiceRequest = (name, price) => ({
-  type: ADD_SERVICE_REQUEST,
+export const saveServiceRequest = (name, price) => ({
+  type: SAVE_SERVICE_REQUEST,
   payload: {
     name,
     price,
   },
 });
 
-export const addServiceFailure = (error) => ({
-  type: ADD_SERVICE_FAILURE,
+export const saveServiceFailure = (error) => ({
+  type: SAVE_SERVICE_FAILURE,
   payload: {
     error,
   },
 });
 
-export const addServiceSuccess = () => ({
-  type: ADD_SERVICE_SUCCESS,
+export const saveServiceSuccess = () => ({
+  type: SAVE_SERVICE_SUCCESS,
 });
 
 export const changeServiceField = (name, value) => ({
@@ -113,36 +116,35 @@ export const fetchServices = async (dispatch) => {
 
 export const fetchEditableService = async (dispatch, id) => {
   dispatch(fetchEditableServiceRequest());
-  console.log('test')
   try {
     const response = await fetch(`${process.env.REACT_APP_API_URL}/${id}`);
     if (!response.ok) {
       throw new Error(response.statusText);
     }
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     dispatch(fetchEditableServiceSuccess(data));
   } catch (e) {
     dispatch(fetchEditableServiceFailure(e.message));
   }
 };
 
-export const addService = async (dispatch, name, price) => {
-  dispatch(addServiceRequest());
+export const saveService = async (dispatch, service) => {
+  dispatch(saveServiceRequest());
   try {
     const response = await fetch(`${process.env.REACT_APP_API_URL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, price }),
+      body: JSON.stringify(service),
     });
     if (!response.ok) {
       throw new Error(response.statusText);
     }
-    dispatch(addServiceSuccess());
+    dispatch(saveServiceSuccess());
   } catch (e) {
-    dispatch(addServiceFailure(e.message));
+    dispatch(saveServiceFailure(e.message));
   }
-  fetchServices(dispatch);
+  // fetchServices(dispatch);
 };
 
 export const deleteService = async (dispatch, id) => {

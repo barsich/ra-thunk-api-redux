@@ -2,18 +2,21 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchServices, deleteService } from '../actions/actionCreators';
+import Error from './Error';
+import Loading from './Loading';
 
 export default function ServiceList() {
-  const { services, loading: servicesLoading, error: servicesError} = useSelector(
-    (state) => state.serviceList
-  );
+  const {
+    services,
+    loading: servicesLoading,
+    error: servicesError,
+  } = useSelector((state) => state.serviceList);
   const { loading: deleteLoading, error: deleteError } = useSelector(
     (state) => state.serviceDelete
   );
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log('test ServiceList')
     fetchServices(dispatch);
   }, [dispatch]);
 
@@ -22,17 +25,11 @@ export default function ServiceList() {
   };
 
   if (servicesLoading || deleteLoading) {
-    return (
-      <img
-        style={{ width: '24px' }}
-        src="https://img.icons8.com/material-rounded/24/000000/dots-loading--v3.gif"
-        alt="loading"
-      />
-    );
+    return <Loading />;
   }
 
   if (servicesError || deleteError) {
-    return <p>Something went wrong try again</p>;
+    return <Error />;
   }
 
   return (

@@ -5,7 +5,12 @@ import {
 } from '../actions/actionTypes';
 
 const initialState = {
-  service: null,
+  service: {
+    id: '',
+    name: '',
+    price: 0,
+    content: '',
+  },
   loading: false,
   error: null,
 };
