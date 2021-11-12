@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { changeServiceField, fetchEditableService, saveService } from '../actions/actionCreators';
 import { objectsCompare } from '../utils';
 import Error from './Error';
@@ -20,22 +20,37 @@ export default function ServiceEdit() {
     error: saveError,
   } = useSelector((state) => state.serviceSave);
   const dispatch = useDispatch();
+  const history = useHistory();
   const params = useParams();
   const { id } = params;
+  const [isSame, setSame] = useState(true);
 
+  const inputName = useRef('');
+  const inputPrice = useRef(0);
+  const inputContent = useRef('');
+
+  // FIXME почти как стейт, но не стейт
+  const actualFormData = {
+    id: 0,
+    name: '',
+    price: 0,
+    content: '',
+  };
+
+  // выцепляем сервис с сервака
   useEffect(() => {
-    async function blabla() {
-      await fetchEditableService(dispatch, id);
-      console.log(service)
+    fetchEditableService(dispatch, id);
+  }, [dispatch, id]);
+
+  // запихиваем его в форму
+  useEffect(() => {
+    for (const key in service) {
+      if (Object.hasOwnProperty.call(service, key)) {
+        const value = service[key];
+        dispatch(changeServiceField(key, value));
+      }
     }
-    blabla()
-    // for (const key in service) {
-    //   if (Object.hasOwnProperty.call(service, key)) {
-    //     const value = service[key];
-    //     dispatch(changeServiceField(key, value));
-    //   }
-    // }
-  }, []);
+  }, [dispatch, service]);
 
   if (serviceLoading) {
     return <Loading />;
@@ -46,21 +61,28 @@ export default function ServiceEdit() {
   }
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+    if (name === 'price') value = Number(value);
     dispatch(changeServiceField(name, value));
+    // FIXME
+    if (actualFormData.id === 0) actualFormData.id = service.id;
+    actualFormData.name = inputName.current.value;
+    actualFormData.price = Number(inputPrice.current.value);
+    actualFormData.content = inputContent.current.value;
+    objectsCompare(service, actualFormData) ? setSame(true) : setSame(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // console.log(service);
-    // console.log(editableService);
-    // console.log(objectsCompare(service, editableService));
-    if (objectsCompare(service, editableService)) {
-      console.log('test');
-      return;
+    await saveService(dispatch, editableService);
+    if (!saveLoading && !saveError) {
+      history.push('/ra-thunk-api-redux/services');
     }
-    // saveService(dispatch, editableService);
   };
+
+  const handleCancel = () => {
+    history.push('/ra-thunk-api-redux/services');
+  }
 
   return (
     <>
@@ -69,19 +91,21 @@ export default function ServiceEdit() {
           Название:
           <input
             type="text"
-            defaultValue={editableService.name}
+            value={editableService.name}
             name="name"
             onChange={handleChange}
+            ref={inputName}
           />
         </label>
         <br />
         <label>
           Стоимость:
           <input
-            type="text"
-            defaultValue={editableService.price}
+            type="number"
+            value={editableService.price}
             name="price"
             onChange={handleChange}
+            ref={inputPrice}
           />
         </label>
         <br />
@@ -89,14 +113,17 @@ export default function ServiceEdit() {
           Описание:
           <input
             type="text"
-            defaultValue={editableService.content}
+            value={editableService.content}
             name="content"
             onChange={handleChange}
+            ref={inputContent}
           />
         </label>
         <br />
-        <button type="submit">Сохранить</button>
-        <button type="reset">Отмена</button>
+        <button type="submit" disabled={isSame && !saveError}>
+          Сохранить
+        </button>
+        <button type="reset" onClick={handleCancel} >Отмена</button>
       </form>
       {saveLoading && <Loading />}
       {saveError && <Error />}

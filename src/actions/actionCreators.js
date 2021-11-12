@@ -3,9 +3,6 @@ import {
   FETCH_SERVICES_REQUEST,
   FETCH_SERVICES_FAILURE,
   FETCH_SERVICES_SUCCESS,
-  ADD_SERVICE_REQUEST,
-  ADD_SERVICE_FAILURE,
-  ADD_SERVICE_SUCCESS,
   REMOVE_SERVICE,
   DELETE_SERVICE_REQUEST,
   DELETE_SERVICE_FAILURE,
@@ -107,7 +104,6 @@ export const fetchServices = async (dispatch) => {
       throw new Error(response.statusText);
     }
     const data = await response.json();
-    console.log(data);
     dispatch(fetchServicesSuccess(data));
   } catch (e) {
     dispatch(fetchServicesFailure(e.message));
@@ -122,7 +118,6 @@ export const fetchEditableService = async (dispatch, id) => {
       throw new Error(response.statusText);
     }
     const data = await response.json();
-    // console.log(data);
     dispatch(fetchEditableServiceSuccess(data));
   } catch (e) {
     dispatch(fetchEditableServiceFailure(e.message));
@@ -144,7 +139,6 @@ export const saveService = async (dispatch, service) => {
   } catch (e) {
     dispatch(saveServiceFailure(e.message));
   }
-  // fetchServices(dispatch);
 };
 
 export const deleteService = async (dispatch, id) => {
